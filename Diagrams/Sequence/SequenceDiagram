@@ -3,5 +3,5 @@
 Петя --> Вася: Authentication Response
 
 Петя -> Вася: Another authentication Request
-Петя <-- Вася: Another authentication Response
+Петя <-- Васяpwd: Another authentication Response
 @enduml
