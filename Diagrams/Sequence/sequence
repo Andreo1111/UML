@@ -1,0 +1,16 @@
+@startuml
+actor "Customer" as customer 
+participant "Web UI" as webui
+participant "Order Controller" as controller
+participant "Payment Service" as payment
+database "Database" as db
+
+customer -> webui : оформление заказа (данные корзины)
+webui -> controller : создание заказа (данные о заказе)
+controller -> db : сохранение заказа (данные заказа)
+db --> controller : заказ сохранён (ID заказа)
+controller -> payment : проведение платёжа (сумма, реквизиты)
+payment --> controller : результат платежа (успех/ошибка)
+controller -> webui : подтвердение заказа (статус)
+webui -> customer : подтверждение результата
+@enduml
