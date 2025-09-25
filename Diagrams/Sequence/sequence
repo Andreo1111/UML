@@ -1,16 +1,41 @@
 @startuml
 actor "Customer" as customer 
-participant "Web UI" as webui
+participant "Web UI" as webui 
 participant "Order Controller" as controller
 participant "Payment Service" as payment
-database "Database" as db
+database "Database" as db #FFBBBB
+participant "Service notification" as notif
+
+group "1.Оформление заказа"
 
 customer -> webui : оформление заказа (данные корзины)
+activate customer
 webui -> controller : создание заказа (данные о заказе)
-controller -> db : сохранение заказа (данные заказа)
-db --> controller : заказ сохранён (ID заказа)
+activate webui
+controller -> db:сохранение заказа (данные заказа)
+activate controller
+activate db
+db -[#green]-> controller : заказ сохранён (ID заказа)
+deactivate db
+end
+
+group "2.Оплата»"
+alt "Успешная оплата"
 controller -> payment : проведение платёжа (сумма, реквизиты)
-payment --> controller : результат платежа (успех/ошибка)
+activate payment
+controller -[#lightblue]-> notif 
+else "Ошибка оплаты"
+payment -[#red]-> controller : результат платежа (успех/ошибка)
+
+end
+end
+group "3.Подтверждение заказа"
+
 controller -> webui : подтвердение заказа (статус)
 webui -> customer : подтверждение результата
+end
+group "4.Изменение корзины заказа"
+customer -> webui: перед оформлением изменить состав корзины.
+end
+
 @enduml
