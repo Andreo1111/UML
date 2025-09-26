@@ -1,9 +1,9 @@
 @startuml
-actor "Customer" as customer 
+actor "Customer" as customer #lightblue
 participant "Web UI" as webui 
 participant "Order Controller" as controller
 participant "Payment Service" as payment
-database "Database" as db #FFBBBB
+database "Database" as db #c7a1a1ff
 participant "Service notification" as notif
 
 group "1.Оформление заказа"
@@ -15,27 +15,44 @@ activate webui
 controller -> db:сохранение заказа (данные заказа)
 activate controller
 activate db
+
 db -[#green]-> controller : заказ сохранён (ID заказа)
 deactivate db
+note right db:сохранено заказа в статусе "Ожидание оплаты"
 end
 
 group "2.Оплата»"
+
 alt "Успешная оплата"
 controller -> payment : проведение платёжа (сумма, реквизиты)
 activate payment
 controller -[#lightblue]-> notif 
 else "Ошибка оплаты"
 payment -[#red]-> controller : результат платежа (успех/ошибка)
+note right controller: заказ сохраняется как предварительный
+end
+end
 
-end
-end
 group "3.Подтверждение заказа"
 
 controller -> webui : подтвердение заказа (статус)
 webui -> customer : подтверждение результата
 end
+
 group "4.Изменение корзины заказа"
+
 customer -> webui: перед оформлением изменить состав корзины.
+note right webui: добавление, изменение,удаление количества
+webui -> controller: обновление корзины
+controller -> db: обновление в базе данных
+db -[#green]-> controller:подтверждение обновления
+controller -> webui: нотификация об обновлении
+end
+
+group "5.Уведомления менеджера"
+
+notif ->webui:уведомление менеджера
+note left  webui: менеджер получет уведомление о новом заказе
 end
 
 @enduml
