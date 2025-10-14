@@ -1,0 +1,94 @@
+@startuml
+
+
+
+' Абстрактный класс Payment
+abstract class Payment {
+  - {static} nextTransactionId: int = 1
+  - amount: double
+  - paymentDate: Date
+  - transactionId: String
+  + {abstract} processPayment(): boolean
+  + {abstract} getPaymentDetails(): String
+  + Payment(amount: double)
+  + getAmount(): double
+  + setAmount(amount: double): void
+  + getPaymentDate(): Date
+  + getTransactionId(): String
+  - generateTransactionId(): String
+}
+
+' Класс для оплаты наличными
+class CashPayment {
+  - cashProvided: double
+  + CashPayment(amount: double, cashProvided: double)
+  + getCashProvided(): double
+  + setCashProvided(cashProvided: double): void
+  + calculateChange(): double
+  - validateCash(): boolean
+}
+
+' Класс для оплаты картой
+class CardPayment {
+  - cardNumber: String
+  - cardHolderName: String
+  - expiryDate: String
+  - cvv: String
+  
+  + CardPayment(amount: double, cardNumber: String, cardHolderName: String, expiryDate: String, cvv: String)
+  + processPayment(): boolean
+  + getPaymentDetails(): String
+  + getCardNumber(): String
+  + setCardNumber(cardNumber: String): void
+  + getCardHolderName(): String
+  + setCardHolderName(cardHolderName: String): void
+  + getExpiryDate(): String
+  + setExpiryDate(expiryDate: String): void
+  + getCvv(): String
+  + setCvv(cvv: String): void
+  - validateCard(): boolean
+  - maskCardNumber(): String
+}
+
+' Менеджер платежей
+class PaymentManager {
+  - payments: List<Payment>
+  + PaymentManager()
+  + addPayment(payment: Payment): void
+  + processAllPayments(): void
+  + getTotalProcessedAmount(): double
+  + getPaymentCount(): int
+  + getPaymentsByType(type: Class<?>): List<Payment>
+  + displayAllPayments(): void
+}
+
+' Исключения
+class PaymentException {
+  - message: String
+  + PaymentException(message: String)
+  + getMessage(): String
+}
+
+class InsufficientCashException {
+  + InsufficientCashException(amount: double, cashProvided: double)
+}
+
+class InvalidCardException {
+  + InvalidCardException(message: String)
+}
+
+' Наследование
+Payment <|-- CashPayment
+Payment <|-- CardPayment
+
+' Ассоциации
+PaymentManager o-- Payment : manages
+PaymentManager --> PaymentException : throws
+CashPayment --> InsufficientCashException : throws
+CardPayment --> InvalidCardException : throws
+
+' Зависимости
+CashPayment ..> InsufficientCashException
+CardPayment ..> InvalidCardException
+
+@enduml
