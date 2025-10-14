@@ -1,0 +1,69 @@
+@startuml
+
+title Рассмотрение кредитной заявки 
+!define Usecase class
+!define Actor class
+
+skinparam groupInheritance 2
+skinparam usecase {
+  BackgroundColor LightBlue
+  BorderColor DarkSlateGray
+}
+
+left to right direction
+
+actor "Клиент" as Client
+actor "Кредитный менеджер" as Manager
+actor "Служба безопасности" as Security
+actor "Бюро кредитных историй" as BKI
+
+usecase "Подать кредитную заявку" as SubmitApp
+usecase "Предоставить документы" as ProvideDocs
+usecase "Получить решение по заявке" as GetDecision
+
+usecase "Зарегистрировать заявку" as RegisterApp
+usecase "Кредитный скоринг(оценка платежеспособности)" as Analyze
+usecase "Принять решение по заявке" as MakeDecision
+usecase "Уведомить клиента" as NotifyClient
+
+usecase "Запросить проверку СБ" as RequestSecCheck
+usecase "Провести проверку клиента" as PerformCheck
+
+usecase "Запросить кредитную историю" as RequestHistory
+usecase "Предоставить кредитный отчет" as ProvideReport
+
+usecase "Одобрить заявку" as Approve
+usecase "Отклонить заявку" as Reject
+
+' Связи акторов c вариантами использования
+Client --> SubmitApp
+Client --> ProvideDocs
+Client --> GetDecision
+
+Manager --> RegisterApp
+Manager --> Analyze
+Manager --> MakeDecision
+Manager --> NotifyClient
+Manager --> RequestSecCheck
+Manager --> RequestHistory
+
+Security --> PerformCheck
+
+BKI --> ProvideReport
+
+' Связи ВКЛЮЧЕНИЕ (include)
+RegisterApp .> Analyze : <<include>>
+Analyze .> MakeDecision : <<include>>
+MakeDecision .> NotifyClient : <<include>>
+
+PerformCheck .> RequestHistory : <<include>>
+
+' Связи РАСШИРЕНИЕ (extend)
+ProvideDocs .|> Analyze : <<extend>>
+ProvideReport .|> Analyze : <<extend>>
+
+' Связи ОБОБЩЕНИЕ (generalization)
+Approve -up-|> MakeDecision
+Reject -up-|> MakeDecision
+
+@enduml
