@@ -1,0 +1,59 @@
+@startuml СистемаОнлайнОбразования
+
+' Классы пользователей
+class User {
+  - id: String
+  - username: String
+  - email: String
+  - password: String
+  - createdAt: Date
+  + login()
+  + logout()
+  + updateProfile()
+}
+
+class Student {
+  - studentId: String
+  - enrollmentDate: Date
+  - level: String
+  + enrollInCourse()
+  + submitAssignment()
+  + viewGrades()
+}
+
+class Instructor {
+  - instructorId: String
+  - specialization: String
+  - hireDate: Date
+  + createCourse()
+  + gradeAssignment()
+  + manageMaterials()
+}
+
+class Admin {
+  - adminId: String
+  - permissions: String[]
+  + manageUsers()
+  + generateReports()
+  + systemConfig()
+}
+
+' Наследование - пользователи
+User <|-- Student
+note on link
+  "наследование (студент — подтип пользователя)"
+end note
+User <|-- Instructor
+note on link
+  "наследование (преподаватель — подтип пользователя)"
+end note
+User <|-- Admin
+note on link
+  "наследование (администратор — подтип пользователя)"
+end note
+
+
+
+
+
+
