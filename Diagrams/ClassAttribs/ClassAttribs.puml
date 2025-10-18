@@ -1,6 +1,5 @@
 @startuml СистемаОнлайнОбразования
-
-' Классы пользователей
+' Класс Пользователь
 class User {
   - id: String
   - username: String
@@ -11,7 +10,7 @@ class User {
   + logout()
   + updateProfile()
 }
-
+' Класс Студент
 class Student {
   - studentId: String
   - enrollmentDate: Date
@@ -20,7 +19,7 @@ class Student {
   + submitAssignment()
   + viewGrades()
 }
-
+' Класс Преподаватель
 class Instructor {
   - instructorId: String
   - specialization: String
@@ -29,7 +28,7 @@ class Instructor {
   + gradeAssignment()
   + manageMaterials()
 }
-
+' Класс Администратор
 class Admin {
   - adminId: String
   - permissions: String[]
@@ -40,7 +39,7 @@ class Admin {
 
 ' Наследование - пользователи
 User <|-- Student
-note on link
+note on link 
   "наследование (студент — подтип пользователя)"
 end note
 User <|-- Instructor
@@ -52,6 +51,184 @@ note on link
   "наследование (администратор — подтип пользователя)"
 end note
 
+' Образовательный контент
+'Класс Курс
+class Course {
+  - courseId: String
+  - title: String
+  - description: String
+  - duration: int
+  - price: BigDecimal
+  - isPublished: boolean
+  + publish()
+  + addModule()
+  + calculateRevenue()
+}
+'Класс Модуль
+class Module {
+  - moduleId: String
+  - title: String
+  - order: int
+  - objectives: String
+  + reorder()
+  + addMaterial()
+}
+' Класс Материал
+class Material {
+  - materialId: String
+  - title: String
+  - type: String
+  - content: Blob
+  - uploadDate: Date
+  + download()
+  + preview()
+}
+' Класс Назначение
+class Assignment {
+  - assignmentId: String
+  - title: String
+  - description: String
+  - dueDate: Date
+  - maxPoints: int
+  + submitSolution()
+  + gradeAssignment()
+}
+
+' Композиция - образовательный контент
+Course *-- "1..*" Module
+note on link
+  "композиция (при удалении курса удаляются и модули)"
+end note
+Module *-- "1..*" Material
+note on link
+  "композиция (модуль состоит из материалов)"
+end note
+Module *-- "0..*" Assignment
+note on link
+  "композиция (модуль содержит задания)"
+end note
+
+
+' Ассоциативные классы
+' Класс Зачисление
+class Enrollment {
+  - enrollmentId: String
+  - enrollmentDate: Date
+  - completionStatus: String
+  - progress: double
+  - finalGrade: String
+  + calculateProgress()
+  + updateStatus()
+}
+' Класс Класс
+class Grade {
+  - gradeId: String
+  - points: double
+  - maxPoints: double
+  - feedback: String
+  - gradedDate: Date
+  + calculatePercentage()
+}
+' Класс Оплата
+class Payment {
+  - paymentId: String
+  - amount: BigDecimal
+  - paymentDate: Date
+  - status: String
+  - transactionId: String
+  + processPayment()
+  + refund()
+}
+
+' Связи ассоциативных классов
+Student "1" -- "*" Enrollment
+Enrollment "*" -- "1" Course
+
+note on link
+  "ассоциативный класс (зачисление студента на курс)"
+end note
+
+Enrollment "1" -- "0..*" Grade
+Assignment "1" -- "0..*" Grade
+
+note on link
+  "ассоциативный класс (оценка за задание в зачислении)"
+end note
+
+Student "0..*" -- "0..*" Payment
+Course "1" -- "0..*" Payment
+
+note on link
+  "ассоциативный класс (платеж за курс)"
+end note
+
+' Дополнительные связи
+Instructor "1" -- "*" Course
+note on link
+  "преподаватель создает курсы (ассоциация, 1..*)"
+end note
+
+Student "1" -- "0..*" Assignment
+note on link
+  "студент выполняет задания (ассоциация, 0..*)"
+end note
+
+Instructor "1" -- "0..*" Grade
+note on link
+  "преподаватель выставляет оценки (ассоциация, 0..*)"
+end note
+
+' Профили пользователей
+' Класс Профиль
+class Profile {
+  - profileId: String
+  - firstName: String
+  - lastName: String
+  - phone: String
+  - avatar: Blob
+  - bio: String
+  + updatePersonalInfo()
+  + uploadAvatar()
+}
+
+User "1" -- "1" Profile
+note on link
+  "пользователь имеет профиль (ассоциация, 1)"
+end note
+
+' Зависимости
+' Класс Оплата Курса
+class PaymentProcessor {
+  - processorId: String
+  - name: String
+  - isActive: boolean
+  + processTransaction()
+  + validatePayment()
+  + refundTransaction()
+}
+
+Course ..> PaymentProcessor
+note on link
+  "зависимость (курс использует процессор для оплаты)"
+end note
+
+Payment ..> PaymentProcessor
+note on link
+  "зависимость (платеж обрабатывается процессором)"
+end note
+
+' Дополнительные связи администратора
+Admin "1" -- "*" User
+note on link
+  "администратор управляет пользователями (ассоциация, 1..*)"
+end note
+
+Admin "1" -- "*" Course
+note on link
+  "администратор модерирует курсы (ассоциация, 1..*)"
+end note
+
+@enduml
 
 
 
