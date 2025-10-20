@@ -1,0 +1,65 @@
+@startuml
+actor Клиент
+participant "Мобильное\nприложение" as App
+participant "Бэкенд" as Backend
+database "База данных" as DB #LightGreen
+participant "СМС-сервис" as SMS
+
+Клиент -> App: Запрос перевода (счёт отправителя,\nсчёт получателя, сумма)
+
+activate App
+
+App -> Backend: Перевод средств (номер счета, БИК,ИНН, номер телефона)
+activate Backend
+
+Backend -> DB: Проверить существование счетов
+activate DB
+DB --> Backend: Результаты проверки
+deactivate DB
+
+alt#Gold #LightBlue Счета существуют и валидны
+    Backend -> DB: Проверить достаточность средств\nна счёте отправителя
+    activate DB
+    DB --> Backend: Результат проверки баланса
+    deactivate DB
+    
+    alt#Gold  #LightGreen Средств достаточно
+        Backend -> DB: Снять средства со счёта отправителя
+        activate DB
+        DB --> Backend: Подтверждение списания
+        deactivate DB
+        
+        Backend -> DB: Зачисление средств на счёт получателя
+        activate DB
+        DB --> Backend: Подтверждение зачисления
+        deactivate DB
+        
+        Backend -> Backend: отправка в историю операций
+        
+        Backend --> App: Успешный перевод
+        deactivate Backend
+        
+        activate App
+        App --> Клиент: Уведомление об успешном переводе
+        
+        opt#Gold #LightCyan Отправка СМС-уведомления
+            App -> SMS: Запрос на отправку СМС
+            activate SMS
+            SMS ->> App: СМС отправлено (асинхронно)
+            deactivate SMS
+        end
+        
+    else #Pink Средств недостаточно
+        Backend --> App: Ошибка: недостаточно средств
+        deactivate Backend
+        App --> Клиент: Уведомление об ошибке
+    end
+
+else #LightSalmon Счета не найдены
+    Backend --> App: Ошибка: счёт не найден
+    deactivate Backend
+    App --> Клиент: Уведомление об ошибке
+end
+
+deactivate App
+@enduml
